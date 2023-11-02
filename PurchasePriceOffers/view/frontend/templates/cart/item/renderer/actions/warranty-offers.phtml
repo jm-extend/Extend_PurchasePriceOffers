@@ -1,0 +1,58 @@
+<?php
+/**
+ * Extend Warranty - "Add Warranty" button on Cart page
+ *
+ * @author      Extend Magento Team <magento@guidance.com>
+ * @category    Extend
+ * @package     Extend_Warranty
+ * @copyright   Copyright (c) 2022 Extend Inc. (https://www.extend.com/)
+ */
+/**
+ * @var \Magento\Checkout\Block\Cart\Item\Renderer\Actions\Generic $block
+ */
+
+/** @var \Magento\Quote\Model\Quote\Item $_item */
+$_item = $block->getItem();
+/** @var \Magento\Catalog\Model\Product $product */
+$product = $_item->getProduct();
+/** @var \Magento\Quote\Model\Quote $quote */
+$quote = $_item->getQuote();
+/** @var \Extend\Warranty\ViewModel\Warranty $viewModel */
+$viewModel = $block->getData('viewModel');
+
+$productType = $product->getTypeId();
+$isConfigurable = $productType === \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE;
+$isWarrantyItem = $productType === \Extend\Warranty\Model\Product\Type::TYPE_CODE;
+
+?>
+
+<?php if (
+    !$isWarrantyItem &&
+    $viewModel->isExtendEnabled() &&
+    $viewModel->isShoppingCartOffersEnabled()
+): ?>
+    <?php
+    $_itemID = $_item->getId();
+    $_currentSku = $viewModel->getProductSkuByQuoteItem($_item);
+    $_secondarySku = $viewModel->getRelationSkuByQuoteItem($_item);
+    $_price = $_item->getPrice();
+    ?>
+    <?php if (!$viewModel->hasWarranty($quote, (int)$_item->getId())): ?>
+        <div class="cart-warranty-offers" id="warranty-offers-<?= $block->escapeHtmlAttr($_itemID) ?>"></div>
+
+        <script type="text/x-magento-init">
+            {
+                "#warranty-offers-<?= $block->escapeHtmlAttr($_itemID) ?>": {
+                    "cartItemWarranty":{
+                        "productSku": "<?= $block->escapeJs($_currentSku) ?>",
+                        "secondarySku": "<?= $block->escapeJs($_secondarySku);?>",
+                        "price": "<?= $block->escapeJs($_price);?>",
+                        "addToCartUrl" : "<?= $block->escapeUrl($block->getUrl('warranty/cart/add')) ?>",
+                        "buttonEnabled": true,
+                        "trackingEnabled": <?= $block->escapeJs($viewModel->isTrackingEnabled() ? 1 : 0) ?>
+                    }
+                }
+            }
+        </script>
+    <?php endif; ?>
+<?php endif; ?>
