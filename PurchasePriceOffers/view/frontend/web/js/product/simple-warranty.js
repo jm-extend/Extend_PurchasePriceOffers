@@ -96,7 +96,7 @@ define([
             warrantyBlock[insertion.method](insertion.element);
 
             warrantyBlock.extendWarrantyOffers({
-                productSku: productSku,
+                productSku: this.options.productSku,
                 buttonEnabled: this.options.buttonEnabled,
                 modalEnabled: this.options.modalEnabled,
                 formInputName: this.options.formInputName.replace('%s', productId)
@@ -107,8 +107,7 @@ define([
             $(".price-box.price-configured_price").on('updatePrice', (event) => {
                 const offerdiv = document.querySelector('.extend-product-offer').parentElement;
                 const price = Math.trunc($('.price-box.price-configured_price').data('mage-priceBox').cache.displayPrices.finalPrice.amount * 100);
-                // console.log('JM: on update sku: '+ producSku+' price : '+price);
-                Extend.setActiveProduct(offerdiv, { referenceId: productSku, price: price });
+                Extend.setActiveProduct(offerdiv, { referenceId: this.options.productSku, price: price.toString() });
 
             });
 
