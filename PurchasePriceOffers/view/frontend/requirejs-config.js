@@ -3,8 +3,7 @@ var config =
         config: {
             mixins: {
                 'Magento_Checkout/js/view/minicart': {
-                    'Extend_Warranty/js/view/minicart-mixin': false,
-                    'Extend_PurchasePriceOffers/js/view/minicart-mixin': true
+                    'Extend_Warranty/js/view/minicart-mixin': true
                 }
             }
         },
