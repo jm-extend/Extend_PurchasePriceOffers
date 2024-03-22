@@ -1,29 +1,28 @@
 <?php
-/**
- * Extend Warranty - "Add Warranty" button on Cart page
- *
- * @author      Extend Magento Team <magento@guidance.com>
- * @category    Extend
- * @package     Extend_Warranty
- * @copyright   Copyright (c) 2022 Extend Inc. (https://www.extend.com/)
- */
-/**
- * @var \Magento\Checkout\Block\Cart\Item\Renderer\Actions\Generic $block
- */
+    /**
+     * Extend Warranty - "Add Warranty" button on Cart page
+     *
+     * @author      Extend Magento Team <magento@guidance.com>
+     * @category    Extend
+     * @package     Extend_Warranty
+     * @copyright   Copyright (c) 2022 Extend Inc. (https://www.extend.com/)
+     */
+    /**
+     * @var \Magento\Checkout\Block\Cart\Item\Renderer\Actions\Generic $block
+     */
 
-/** @var \Magento\Quote\Model\Quote\Item $_item */
-$_item = $block->getItem();
-/** @var \Magento\Catalog\Model\Product $product */
-$product = $_item->getProduct();
-/** @var \Magento\Quote\Model\Quote $quote */
-$quote = $_item->getQuote();
-/** @var \Extend\Warranty\ViewModel\Warranty $viewModel */
-$viewModel = $block->getData('viewModel');
+    /** @var \Magento\Quote\Model\Quote\Item $_item */
+    $_item = $block->getItem();
+    /** @var \Magento\Catalog\Model\Product $product */
+    $product = $_item->getProduct();
+    /** @var \Magento\Quote\Model\Quote $quote */
+    $quote = $_item->getQuote();
+    /** @var \Extend\Warranty\ViewModel\Warranty $viewModel */
+    $viewModel = $block->getData('viewModel');
 
-$productType = $product->getTypeId();
-$isConfigurable = $productType === \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE;
-$isWarrantyItem = $productType === \Extend\Warranty\Model\Product\Type::TYPE_CODE;
-
+    $productType = $product->getTypeId();
+    $isConfigurable = $productType === \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE;
+    $isWarrantyItem = $productType === \Extend\Warranty\Model\Product\Type::TYPE_CODE;
 ?>
 
 <?php if (
@@ -32,10 +31,10 @@ $isWarrantyItem = $productType === \Extend\Warranty\Model\Product\Type::TYPE_COD
     $viewModel->isShoppingCartOffersEnabled()
 ): ?>
     <?php
-    $_itemID = $_item->getId();
-    $_currentSku = $viewModel->getProductSkuByQuoteItem($_item);
-    $_secondarySku = $viewModel->getRelationSkuByQuoteItem($_item);
-    $_price = $_item->getPrice();
+        $_itemID = $_item->getId();
+        $_currentSku = $viewModel->getProductSkuByQuoteItem($_item);
+        $_secondarySku = $viewModel->getRelationSkuByQuoteItem($_item);
+        $_price = $product->getFinalPrice();
     ?>
     <?php if (!$viewModel->hasWarranty($quote, (int)$_item->getId())): ?>
         <div class="cart-warranty-offers" id="warranty-offers-<?= $block->escapeHtmlAttr($_itemID) ?>"></div>

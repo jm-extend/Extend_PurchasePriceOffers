@@ -1,7 +1,7 @@
 /**
- * Extend Warranty - PDP/PLP widget for bundle products
+ * Extend Warranty - PDP/PLP widget for simple product
  *
- * @author      Extend Magento Team <magento@extend.com>
+ * @author      Extend Magento Team <magento@guidance.com>
  * @category    Extend
  * @package     Extend_Warranty
  * @copyright   Copyright (c) 2022 Extend Inc. (https://www.extend.com/)
@@ -21,12 +21,14 @@ define([
             productSku: null,
             buttonEnabled: true,
             modalEnabled: false,
+            productInfo: {},
             blockClass: 'product-warranty-offers',
-            insertionPoint: '.product-protect div',
-            insertionLogic: 'append',
+            insertionPoint: 'div.actions',
+            insertionLogic: 'before',
             formInputName: 'warranty',
             formInputClass: 'extend-warranty-input',
             selectors: {
+                pdpWrapper: '.product-info-main',
                 addToCartForm: '#product_addtocart_form',
                 addToCartButton: '#product-addtocart-button'
             }
@@ -46,7 +48,11 @@ define([
             this._initElements();
             this._bind();
 
-            this.warrantyBlock = this._initWarrantyOffersBlock(this.options.productId, this.options.productSku);
+            this.warrantyBlock = this._initWarrantyOffersBlock(
+                this.options.productId,
+                this.options.productSku,
+                this.options.productInfo
+            );
         },
 
         /**
@@ -55,7 +61,7 @@ define([
          */
         _initElements: function () {
             this.mainWrap = this.options.isInProductView ?
-                this.element.parents('.column.main') :
+                this.element.closest(this.options.selectors.pdpWrapper) :
                 this.element;
 
             this.addToCartForm = $(this.options.selectors.addToCartForm, this.mainWrap);
@@ -80,9 +86,10 @@ define([
          * @protected
          * @param {String} productId - product ID
          * @param {String} productSku - product SKU
+         * @param {Object} productInfo - {price:"$price", category:"$category"}
          * @return {jQuery|HTMLElement}
          */
-        _initWarrantyOffersBlock: function (productId, productSku) {
+        _initWarrantyOffersBlock: function (productId, productSku, productInfo) {
             var blockID = 'warranty-offers-' + productId;
 
             if (this.warrantyBlock.length) {
@@ -90,25 +97,23 @@ define([
             }
 
             var warrantyBlock = $('<div>').attr('id', blockID).addClass(this.options.blockClass);
-            warrantyBlock.data('id', productId);
 
             var insertion = this._getWarrantyOffersInsertion(productId, productSku);
             warrantyBlock[insertion.method](insertion.element);
 
             warrantyBlock.extendWarrantyOffers({
-                productSku: this.options.productSku,
+                productSku: productSku,
                 buttonEnabled: this.options.buttonEnabled,
+                productInfo: productInfo,
                 modalEnabled: this.options.modalEnabled,
                 formInputName: this.options.formInputName.replace('%s', productId)
             });
             this._renderWarrantyOffers(warrantyBlock);
 
-            //bundled products updatePrice event
-            $(".price-box.price-configured_price").on('updatePrice', (event) => {
+            $(".price-box").on('updatePrice', (event) => {
                 const offerdiv = document.querySelector('.extend-product-offer').parentElement;
-                const price = Math.trunc($('.price-box.price-configured_price').data('mage-priceBox').cache.displayPrices.finalPrice.amount * 100);
-                Extend.setActiveProduct(offerdiv, { referenceId: this.options.productSku, price: price.toString() });
-
+                const price = Math.trunc($('.price-box').data('mage-priceBox').cache.displayPrices.finalPrice.amount * 100);
+                Extend.setActiveProduct(offerdiv, { referenceId: productSku, price: price });
             });
 
             return warrantyBlock;
@@ -135,7 +140,14 @@ define([
                     break;
             }
 
-            var elem = this.options.insertionPoint ? $(this.options.insertionPoint) : this.element;
+            var elem = this.element;
+            if (this.options.insertionPoint) {
+                elem = $(this.options.insertionPoint, this.mainWrap).first();
+                if (!elem.length) {
+                    elem = this.element;
+                    method = 'appendTo';
+                }
+            }
 
             return {
                 element: elem,
@@ -194,7 +206,7 @@ define([
 
             // Plan is not selected & warranty offers modal is enabled
             if (this.options.modalEnabled) {
-                this._addToCartFromModal(productSku);
+                this._addToCartFromModal(productSku, this.options.productInfo);
 
                 event.preventDefault();
                 event.stopPropagation();
@@ -208,16 +220,21 @@ define([
          * Opens Extend Warranty modal
          * @protected
          * @param {String} productSku - currently selected product SKU
+         * @param {Object} productInfo
          */
-        _addToCartFromModal: function (productSku) {
-            this.warrantyBlock.extendWarrantyOffers('openOffersModal', productSku, function (plan) {
-                this._removeWarrantyInputs();
+        _addToCartFromModal: function (productSku, productInfo) {
+            this.warrantyBlock.extendWarrantyOffers(
+                'openOffersModal',
+                productSku,
+                productInfo,
+                function (plan) {
+                    this._removeWarrantyInputs();
 
-                if (plan) {
-                    this._appendWarrantyInputs(this.warrantyBlock, productSku, plan, 'modal');
-                }
-                this._submitAddToCartForm();
-            }.bind(this));
+                    if (plan) {
+                        this._appendWarrantyInputs(this.warrantyBlock, productSku, plan, 'modal');
+                    }
+                    this._submitAddToCartForm();
+                }.bind(this));
         },
 
         /**
