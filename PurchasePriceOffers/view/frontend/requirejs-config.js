@@ -1,12 +1,14 @@
 var config =
     {
-        config: {
-            mixins: {
+       paths: {
+                'extendSdk': 'https://sdk.helloextend.com/extend-sdk-client/v1/extend-sdk-client.min',
+            },
+       mixins: {
                 'Magento_Checkout/js/view/minicart': {
-                    'Extend_Warranty/js/view/minicart-mixin': true
+                    'Extend_Warranty/js/view/minicart-mixin': false,
+                    'Extend_PurchasePriceOffers/js/view/minicart-mixin': true
                 }
-            }
-        },
+            },
         map:
             {
                 '*':

@@ -1,7 +1,7 @@
 /**
  * Extend Warranty base widget
  *
- * @author      Extend Magento Team <magento@guidance.com>
+ * @author      Extend Magento Team <magento@extend.com>
  * @category    Extend
  * @package     Extend_Warranty
  * @copyright   Copyright (c) 2022 Extend Inc. (https://www.extend.com/)
@@ -17,7 +17,6 @@ define([
         options: {
             productSku: null,
             buttonEnabled: true,
-            productInfo: {},
             modalEnabled: false,
             formInputName: 'warranty'
         },
@@ -29,10 +28,11 @@ define([
             if (!this.options.buttonEnabled)
                 return;
 
+            const price = Math.trunc($('.price-box').data('mage-priceBox').cache.displayPrices.finalPrice.amount * 100);
+
             Extend.buttons.render(this.element.get(0), {
                 referenceId: this.options.productSku,
-                category: this.sanitizeValue(this.options.productInfo.category),
-                price:this.options.productInfo.price
+                price: price
             });
         },
 
@@ -45,14 +45,11 @@ define([
             if (!this.options.buttonEnabled)
                 return;
 
-            if (this.options.price) {
-                this.options.productInfo.price = Math.trunc(this.options.price*100);
-            }
+            const price = Math.trunc(this.options.price * 100);
 
             Extend.buttons.renderSimpleOffer(this.element.get(0), {
                 referenceId: this.options.productSku,
-                category: this.sanitizeValue(this.options.productInfo.category),
-                price:this.options.productInfo.price,
+                price: price,
                 onAddToCart: function (data) {
                     var warranty = data.plan;
                     if (warranty && data.product) {
@@ -64,29 +61,6 @@ define([
                     }
                 }
             });
-        },
-
-        /**
-         * Returns sanitized value for payload
-         * @param {String} theString
-         * @return {string|null}
-         */
-        sanitizeValue: function (theString ) {
-            if (!theString)
-                return;
-
-            // Use a regular expression to find HTML-encoded sections (e.g., %25)
-            var encodedSectionRegex = /%[0-9A-Fa-f]{2}/g;
-
-            // Replace each HTML-encoded section with its decoded equivalent
-            var decodedString = theString.replace(encodedSectionRegex, function(match) {
-                return decodeURIComponent(match);
-            });
-
-            // replace breaking characters
-            var theSanitizedString = decodedString.replace(/%/g, "pct ").replace(/\?/g, ".").replace(/#/g, ".").replace(/&/g, "and");
-
-            return theSanitizedString;
         },
 
         /**
@@ -110,12 +84,7 @@ define([
 
             var product = component.getActiveProduct() || { id: '' };
             if (product.id !== productSku) {
-                let activeProduct = {
-                    referenceId:productSku,
-                    price: product.price,
-                    category: this.sanitizeValue(product.category)
-                };
-                component.setActiveProduct(activeProduct);
+                component.setActiveProduct(productSku);
             }
         },
 
@@ -123,19 +92,19 @@ define([
          * Opens warranty offers modal
          *
          * @param {String} productSku - product SKU
-         * @param {Object} productInfo
          * @param {Function} closeCallback - function to be invoked after the modal is closed
          */
-        openOffersModal: function (productSku,productInfo, closeCallback) {
+        openOffersModal: function (productSku, closeCallback) {
             if (!this.options.modalEnabled) {
                 closeCallback(null);
                 return;
             }
 
+            const price = Math.trunc($('.price-box').data('mage-priceBox').cache.displayPrices.finalPrice.amount * 100);
+
             Extend.modal.open({
                 referenceId: productSku,
-                price:productInfo.price,
-                category: this.sanitizeValue(productInfo.category),
+                price: price,
                 onClose: closeCallback.bind(this)
             });
         },
@@ -168,5 +137,3 @@ define([
 
     return $.mage.extendWarrantyOffers;
 });
-
-
