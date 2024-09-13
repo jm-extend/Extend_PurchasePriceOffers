@@ -13,5 +13,8 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Extend\Warranty\Model\Offers"
                 type="Extend\PurchasePriceOffers\Model\Offers"/>
+    <type name="Magento\Framework\RequireJs\Config\File\Collector\Aggregated">
+        <plugin name="requirejsConfigPlugin" type="Extend\PurchasePriceOffers\Plugin\RequireJs\AfterGetFilesPlugin" sortOrder="100"/>
+    </type>
 
 </config>
